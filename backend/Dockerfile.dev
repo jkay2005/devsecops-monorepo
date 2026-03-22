@@ -1,0 +1,12 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy file cấu hình thư viện vào
+COPY package*.json ./
+
+# Cài đặt thư viện 
+RUN npm install
+RUN npm install -g nodemon
+
+CMD ["npm", "run", "dev"]
