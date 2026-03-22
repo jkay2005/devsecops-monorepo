@@ -9,3 +9,5 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Backend Server listening on port ${port}`);
 });
+
+// Test kich hoat CI/CD tren GitHub Actions
