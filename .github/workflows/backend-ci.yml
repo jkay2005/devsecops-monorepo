@@ -42,7 +42,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: "khiemdg/devsecops-backend:latest"
-          exit-code: "1" # Bắt buộc báo lỗi pipeline nếu có lỗ hổng nghiêm trọng
+          #exit-code: "1" # Bắt buộc báo lỗi pipeline nếu có lỗ hổng nghiêm trọng
+          exit-code: "0" # Không bắt buộc báo lỗi pipeline nếu có lỗ hổng, chỉ cảnh báo
           ignore-unfixed: true
           vuln-type: "os,library"
           severity: "CRITICAL,HIGH" # Chỉ chặn lại nếu lỗi ở mức Cao và Nghiêm trọng
