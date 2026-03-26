@@ -3,7 +3,7 @@ const app = express();
 const port = 3000;
 
 app.get('/', (req, res) => {
-  res.send('Hello từ AKS tự động hóa hoàn toàn!');
+  res.send('Hello từ AKS, đang test Trivy!');
 });
 
 app.listen(port, () => {
