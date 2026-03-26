@@ -10,4 +10,4 @@ app.listen(port, () => {
   console.log(`Backend Server listening on port ${port}`);
 });
 
-// Test kich hoat CI/CD tren GitHub Actions
+// Ép Action chạy lần cuối để test Trivy
