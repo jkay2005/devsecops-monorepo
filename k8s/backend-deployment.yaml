@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devsecops-backend-deployment
+spec:
+  replicas: 1 # Số lượng container
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend-container
+          image: khiemdg/devsecops-backend:latest # Image trên Docker Hub
+          ports:
+            - containerPort: 3000 # Cổng mà code Node.js lắng nghe
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devsecops-backend-service
+spec:
+  type: LoadBalancer # Yêu cầu Azure cấp một IP Public
+  ports:
+    - port: 80 # Cổng Public người dùng sẽ gõ trên trình duyệt
+      targetPort: 3000 # Map vào cổng 3000 của container bên trong
+  selector:
+    app: backend

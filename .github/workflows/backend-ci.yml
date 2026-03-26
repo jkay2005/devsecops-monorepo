@@ -3,14 +3,14 @@ name: Backend CI/CD Pipeline
 # Khi nào Robot được phép chạy?
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
-      - 'backend/**' # Chỉ chạy CI khi có file thay đổi trong thư mục backend, sửa frontend không làm chạy lại backend
+      - "backend/**" # Chỉ chạy CI khi có file thay đổi trong thư mục backend, sửa frontend không làm chạy lại backend
 
 #Nhiệm vụ của Robot
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest # Thuê một máy chủ Ubuntu 
+    runs-on: ubuntu-latest # Thuê một máy chủ Ubuntu
 
     steps:
       #Clone toàn bộ code từ GitHub về cái máy chủ Ubuntu đó
@@ -28,11 +28,24 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      #Đóng gói khối bê tông và đẩy lên 
+      #Đóng gói khối bê tông và đẩy lên
       - name: Build và Push Image
         uses: docker/build-push-action@v4
         with:
-          context: ./backend             # Thư mục chứa mã nguồn
-          file: ./backend/Dockerfile     # Chỉ định file Dockerfile Production
-          push: true                     # Đóng gói xong thì đẩy lên
+          context: ./backend # Thư mục chứa mã nguồn
+          file: ./backend/Dockerfile # Chỉ định file Dockerfile Production
+          push: true # Đóng gói xong thì đẩy lên
           tags: khiemdg/devsecops-backend:latest
+
+      # Thiết lập kết nối với cụm AKS bằng Kubeconfig đã lưu trong Secret
+      - name: Kết nối với Azure Kubernetes Service (AKS)
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      # Chạy lệnh áp dụng file cấu hình vào cụm AKS
+      - name: Triển khai lên AKS
+        run: |
+          kubectl apply -f k8s/backend-deployment.yaml
+          kubectl rollout restart deployment devsecops-backend-deployment
