@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 #Khai báo môi trường là Production
 ENV NODE_ENV=production
