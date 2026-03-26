@@ -37,6 +37,16 @@ jobs:
           push: true # Đóng gói xong thì đẩy lên
           tags: khiemdg/devsecops-backend:latest
 
+          # Quét lỗ hổng bảo mật của Docker Image bằng Trivy
+      - name: Quét lỗ hổng Docker Image với Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "khiemdg/devsecops-backend:latest"
+          exit-code: "1" # Bắt buộc báo lỗi pipeline nếu có lỗ hổng nghiêm trọng
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH" # Chỉ chặn lại nếu lỗi ở mức Cao và Nghiêm trọng
+
       # Thiết lập kết nối với cụm AKS bằng Kubeconfig đã lưu trong Secret
       - name: Kết nối với Azure Kubernetes Service (AKS)
         uses: azure/k8s-set-context@v3
