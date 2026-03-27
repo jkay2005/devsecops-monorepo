@@ -26,7 +26,7 @@ jobs:
         with:
           args: >
             -Dsonar.organization=khiemdg
-            -Dsonar.projectKey=khiemdg_devsecops-monorepo
+            -Dsonar.projectKey=jkay2005_devsecops-monorepo
             -Dsonar.sources=backend/
 
       #Cài đặt công cụ Build Docker
