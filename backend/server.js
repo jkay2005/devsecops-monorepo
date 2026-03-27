@@ -12,3 +12,4 @@ app.listen(port, () => {
 
 // Ép Action chạy lần cuối để test trivy
 // Thêm comment để test sonarcloud lần nữa
+// Thêm comment để test sonarcloud voi fix project key
