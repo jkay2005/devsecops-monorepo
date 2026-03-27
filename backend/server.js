@@ -10,4 +10,5 @@ app.listen(port, () => {
   console.log(`Backend Server listening on port ${port}`);
 });
 
-// Ép Action chạy lần cuối để test Trivy
+// Ép Action chạy lần cuối để test trivy
+// Thêm comment để test sonarcloud lần nữa
