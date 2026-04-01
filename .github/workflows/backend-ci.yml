@@ -49,9 +49,15 @@ jobs:
           vuln-type: "os,library"
           severity: "CRITICAL,HIGH"
 
-      - name: Đăng nhập vào Harbor
+      - name: 🔑 Đăng nhập vào Harbor
+        env:
+          # Đưa Secrets vào biến môi trường an toàn của Linux
+          HARBOR_USER: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASS: ${{ secrets.HARBOR_PASSWORD }}
+          HARBOR_IP: ${{ secrets.HARBOR_HOST }}
         run: |
-          echo "${{ secrets.HARBOR_PASSWORD }}" | docker login ${{ secrets.HARBOR_HOST }} -u "${{ secrets.HARBOR_USERNAME }}" --password-stdin
+          # Gọi biến ra dùng một cách an toàn
+          echo "$HARBOR_PASS" | docker login $HARBOR_IP -u "$HARBOR_USER" --password-stdin
 
       - name: 🚀 Push Image lên Harbor
         # Chỉ chạy lệnh này khi đã vượt qua bài test của Trivy
