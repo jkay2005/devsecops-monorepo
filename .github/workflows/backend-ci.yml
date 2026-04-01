@@ -22,18 +22,6 @@ jobs:
       - name: Lấy mã nguồn (Checkout code)
         uses: actions/checkout@v3
 
-      # Quét mã nguồn tĩnh với SonarCloud
-      - name: Phân tích mã nguồn tĩnh (SAST) với SonarCloud
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=khiemdg
-            -Dsonar.projectKey=jkay2005_devsecops-monorepo
-            -Dsonar.sources=backend/
-
       # Đăng nhập Azure qua OIDC
       - name: Đăng nhập Azure
         uses: azure/login@v2
@@ -41,6 +29,27 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # BƯỚC MỚI: Gọi Robot vào lấy Secret từ Key Vault
+      - name: Lấy Secret từ Azure Key Vault
+        uses: Azure/get-keyvault-secrets@v1
+        with:
+          keyvault: "kv-devsecops-nt114" # Tên Key Vault
+          secrets: "SONAR-TOKEN" # Secret chứa token SonarCloud trong Key Vault
+        id: kvSecrets # Đặt ID
+
+      # Quét mã nguồn tĩnh với SonarCloud
+      - name: Phân tích mã nguồn tĩnh (SAST) với SonarCloud
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ steps.kvSecrets.outputs.SONAR-TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=khiemdg
+            -Dsonar.projectKey=jkay2005_devsecops-monorepo
+            -Dsonar.sources=backend/
 
       # Đăng nhập ACR (Thay thế cho Harbor login)
       - name: Đăng nhập vào ACR

@@ -15,3 +15,4 @@ app.listen(port, () => {
 // Thêm comment để test sonarcloud voi fix project key
 // Thêm comment để test harbor - fix syntax name cua harbor username
 // Thêm comment để test acr thay harbor
+// Thêm comment để test keyvault với sonarcloud token
