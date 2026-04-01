@@ -15,7 +15,8 @@ spec:
       containers:
         - name: backend-container
           # image: khiemdg/devsecops-backend:latest # Image trên Docker Hub
-          image: 20.78.47.90:80/devsecops-app/devsecops-backend:latest # Image trên Harbor
+          # image: 20.78.47.90:80/devsecops-app/devsecops-backend:latest # Image trên Harbor
+          image: acrdevsecopsnt114.azurecr.io/devsecops-backend:latest # Image trên Azure Container Registry
           ports:
             - containerPort: 3000 # Cổng mà code Node.js lắng nghe
 

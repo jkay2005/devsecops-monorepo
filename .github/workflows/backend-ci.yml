@@ -7,6 +7,11 @@ on:
     paths:
       - "backend/**" # Chỉ chạy CI khi có file thay đổi trong thư mục backend, sửa frontend không làm chạy lại backend
 
+# cấp quyền cho OIDC để kết nối Azure không mật khẩu
+permissions:
+  id-token: write
+  contents: read
+
 #Nhiệm vụ của Robot
 jobs:
   build-and-push:
@@ -29,40 +34,68 @@ jobs:
             -Dsonar.projectKey=jkay2005_devsecops-monorepo
             -Dsonar.sources=backend/
 
-      - name: Thiết lập Docker Insecure Registry (Cho Harbor HTTP)
-        run: |
-          sudo bash -c "echo '{\"insecure-registries\": [\"${{ secrets.HARBOR_HOST }}\"]}' > /etc/docker/daemon.json"
-          sudo systemctl restart docker
+      # Đăng nhập Azure qua OIDC
+      - name: Đăng nhập Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Build Docker Image (Chưa push)
-        # Đóng gói image và gắn tag trỏ về Harbor
-        run: |
-          docker build -t ${{ secrets.HARBOR_HOST }}/devsecops-app/devsecops-backend:latest ./backend -f ./backend/Dockerfile
+      # Đăng nhập ACR (Thay thế cho Harbor login)
+      - name: Đăng nhập vào ACR
+        run: az acr login --name acrdevsecopsnt114
 
+      # - name: Thiết lập Docker Insecure Registry (Cho Harbor HTTP)
+      #   run: |
+      #     sudo bash -c "echo '{\"insecure-registries\": [\"${{ secrets.HARBOR_HOST }}\"]}' > /etc/docker/daemon.json"
+      #     sudo systemctl restart docker
+
+      # Build Image trỏ về ACR
+      - name: Build Docker Image
+        run: |
+          docker build -t acrdevsecopsnt114.azurecr.io/devsecops-backend:latest ./backend -f ./backend/Dockerfile
+
+      # - name: Build Docker Image (Chưa push)
+      #   # Đóng gói image và gắn tag trỏ về Harbor
+      #   run: |
+      #     docker build -t ${{ secrets.HARBOR_HOST }}/devsecops-app/devsecops-backend:latest ./backend -f ./backend/Dockerfile
+
+      # - name: Quét lỗ hổng Docker Image với Trivy
+      #   # Quét Image cục bộ vừa build. Nếu lỗi, dừng không cho Push lên Harbor
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     image-ref: "${{ secrets.HARBOR_HOST }}/devsecops-app/devsecops-backend:latest"
+      #     exit-code: "0" # Đang để 0 để không chặn pipeline
+      #     ignore-unfixed: true
+      #     vuln-type: "os,library"
+      #     severity: "CRITICAL,HIGH"
+
+      # Quét lỗ hổng Image với Trivy (Quét trên ACR tag)
       - name: Quét lỗ hổng Docker Image với Trivy
-        # Quét Image cục bộ vừa build. Nếu lỗi, dừng không cho Push lên Harbor
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: "${{ secrets.HARBOR_HOST }}/devsecops-app/devsecops-backend:latest"
-          exit-code: "0" # Đang để 0 để không chặn pipeline
+          image-ref: "acrdevsecopsnt114.azurecr.io/devsecops-backend:latest"
+          exit-code: "0"
           ignore-unfixed: true
           vuln-type: "os,library"
           severity: "CRITICAL,HIGH"
 
-      - name: 🔑 Đăng nhập vào Harbor
-        env:
-          # Đưa Secrets vào biến môi trường an toàn của Linux
-          HARBOR_USER: ${{ secrets.HARBOR_USERNAME }}
-          HARBOR_PASS: ${{ secrets.HARBOR_PASSWORD }}
-          HARBOR_IP: ${{ secrets.HARBOR_HOST }}
-        run: |
-          # Gọi biến ra dùng một cách an toàn
-          echo "$HARBOR_PASS" | docker login $HARBOR_IP -u "$HARBOR_USER" --password-stdin
+      # - name: Đăng nhập vào Harbor
+      #   env:
+      #     # Đưa Secrets vào biến môi trường an toàn của Linux
+      #     HARBOR_USER: ${{ secrets.HARBOR_USERNAME }}
+      #     HARBOR_PASS: ${{ secrets.HARBOR_PASSWORD }}
+      #     HARBOR_IP: ${{ secrets.HARBOR_HOST }}
+      #   run: |
+      #     # Gọi biến ra dùng một cách an toàn
+      #     echo "$HARBOR_PASS" | docker login $HARBOR_IP -u "$HARBOR_USER" --password-stdin
 
-      - name: 🚀 Push Image lên Harbor
-        # Chỉ chạy lệnh này khi đã vượt qua bài test của Trivy
-        run: |
-          docker push ${{ secrets.HARBOR_HOST }}/devsecops-app/devsecops-backend:latest
+      # - name: Push Image lên Harbor
+      #   # Chỉ chạy lệnh này khi đã vượt qua bài test của Trivy
+      #   run: |
+      #     docker push ${{ secrets.HARBOR_HOST }}/devsecops-app/devsecops-backend:latest
+
       # #Cài đặt công cụ Build Docker
       # - name: Thiết lập Docker Buildx
       #   uses: docker/setup-buildx-action@v2
@@ -74,7 +107,7 @@ jobs:
       #     username: ${{ secrets.DOCKER_USERNAME }}
       #     password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # #Đóng gói khối bê tông và đẩy lên
+      # #Đóng gói đẩy lên
       # - name: Build và Push Image
       #   uses: docker/build-push-action@v4
       #   with:
@@ -94,12 +127,22 @@ jobs:
       #     vuln-type: "os,library"
       #     severity: "CRITICAL,HIGH" # Chỉ chặn lại nếu lỗi ở mức Cao và Nghiêm trọng
 
-      # Thiết lập kết nối với cụm AKS bằng Kubeconfig đã lưu trong Secret
-      - name: Kết nối với Azure Kubernetes Service (AKS)
-        uses: azure/k8s-set-context@v3
-        with:
-          method: kubeconfig
-          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+      # # Thiết lập kết nối với cụm AKS bằng Kubeconfig đã lưu trong Secret
+      # - name: Kết nối với Azure Kubernetes Service (AKS)
+      #   uses: azure/k8s-set-context@v3
+      #   with:
+      #     method: kubeconfig
+      #     kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      # Push Image lên ACR
+      - name: Push Image lên ACR
+        run: |
+          docker push acrdevsecopsnt114.azurecr.io/devsecops-backend:latest
+
+      # Kết nối AKS (Lấy kubeconfig tự động, không cần lưu Secret KUBE_CONFIG)
+      - name: Kết nối với cụm AKS
+        run: |
+          az aks get-credentials --resource-group rg-devsecopsnt114-aks --name aks-devsecops-nt114 --overwrite-existing
 
       # Chạy lệnh áp dụng file cấu hình vào cụm AKS
       - name: Triển khai lên AKS
