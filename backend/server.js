@@ -91,3 +91,4 @@ app.listen(port, () => {
 // Thêm comment để test keyvault với sonarcloud token
 // Thêm comment để test ci/cd với việc gắn tag image bằng short SHA của commit
 // Thêm comment để test ci/cd với việc gắn tag image bằng short SHA của commit-fix loi lo hong high trong trivy
+// Thêm comment để test ci/cd với fix loi lo hong critical trong trivy
