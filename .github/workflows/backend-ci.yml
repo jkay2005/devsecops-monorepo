@@ -68,7 +68,7 @@ jobs:
       # Build Image trỏ về ACR
       - name: Build Docker Image
         run: |
-          docker build -t acrdevsecopsnt114.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }} ./backend
+          docker build --no-cache -t acrdevsecopsnt114.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }} ./backend
 
       # - name: Build Docker Image (Chưa push)
       #   # Đóng gói image và gắn tag trỏ về Harbor
@@ -92,7 +92,7 @@ jobs:
           # image-ref: "acrdevsecopsnt114.azurecr.io/devsecops-backend:latest"
           # exit-code: "0"
           image-ref: "acrdevsecopsnt114.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }}"
-          exit-code: "1"       # '1' pipeline dừng khi thấy lỗ hổng nghiêm trọng
+          exit-code: "1" # '1' pipeline dừng khi thấy lỗ hổng nghiêm trọng
           ignore-unfixed: true
           vuln-type: "os,library"
           severity: "CRITICAL,HIGH"
