@@ -89,4 +89,4 @@ app.listen(port, () => {
 // Thêm comment để test harbor - fix syntax name cua harbor username
 // Thêm comment để test acr thay harbor
 // Thêm comment để test keyvault với sonarcloud token
-// Thêm comment để test ci/cd với việc gắn tag image bằng short SHA của commit-lần 2
+// Thêm comment để test ci/cd với việc gắn tag image bằng short SHA của commit-lần 4
