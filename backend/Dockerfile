@@ -1,9 +1,9 @@
 FROM node:20-alpine
 
+RUN apk update && apk upgrade --no-cache
+
 #Khai báo môi trường là Production
 ENV NODE_ENV=production
-
-RUN apk update && apk upgrade --no-cache
 
 WORKDIR /app
 
