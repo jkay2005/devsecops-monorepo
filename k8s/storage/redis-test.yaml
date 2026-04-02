@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis-test-pod
+spec:
+  containers:
+    - name: redis
+      image: redis:7.0-alpine # Dùng bản alpine nhẹ và nhanh
+      volumeMounts:
+        - name: redis-data
+          mountPath: /data # Nơi Redis lưu trữ dữ liệu bền vững
+  volumes:
+    - name: redis-data
+      persistentVolumeClaim:
+        claimName: redis-pvc # Tên PVC của Redis

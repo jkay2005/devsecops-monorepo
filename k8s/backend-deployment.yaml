@@ -16,9 +16,18 @@ spec:
         - name: backend-container
           # image: khiemdg/devsecops-backend:latest # Image trên Docker Hub
           # image: 20.78.47.90:80/devsecops-app/devsecops-backend:latest # Image trên Harbor
-          image: acrdevsecopsnt114.azurecr.io/devsecops-backend:latest # Image trên Azure Container Registry
+          # image: acrdevsecopsnt114.azurecr.io/devsecops-backend:latest # Image trên Azure Container Registry
+          image: acrdevsecopsnt114.azurecr.io/devsecops-backend:v1.0.0 # Image trên Azure Container Registry với tag cụ thể
           ports:
             - containerPort: 3000 # Cổng mà code Node.js lắng nghe
+
+          # Bơm biến môi trường từ Kubernetes Secret
+          env:
+            - name: BLOB_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: BLOB_CONNECTION_STRING
 
 ---
 apiVersion: v1

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql-test-pod
+spec:
+  containers:
+    - name: mysql
+      image: mysql:8.0
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "temporaryPassword123" # Chỉ dùng để test binding
+      volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+  volumes:
+    - name: mysql-data
+      persistentVolumeClaim:
+        claimName: mysql-pvc # Tên PVC bạn vừa tạo

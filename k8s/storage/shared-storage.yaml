@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-log-pvc
+spec:
+  accessModes:
+    - ReadWriteMany # Nhiều Pod có thể cùng đọc/ghi
+  storageClassName: azurefile-csi
+  resources:
+    requests:
+      storage: 50Gi
