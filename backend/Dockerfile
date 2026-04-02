@@ -1,5 +1,7 @@
 FROM node:20-alpine
 
+RUN npm install -g npm@latest
+
 RUN apk update && apk upgrade --no-cache
 
 #Khai báo môi trường là Production
