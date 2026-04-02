@@ -11,8 +11,14 @@ WORKDIR /app
 
 COPY package*.json ./
 
-#cài đặt các thư viện cần thiết để chạy (Bỏ qua nodemon)
-RUN npm install --omit=dev
+# #cài đặt các thư viện cần thiết để chạy (Bỏ qua nodemon)
+# RUN npm install --omit=dev
+
+# Thay bằng khối lệnh này:
+RUN npm install --omit=dev \
+    && rm -rf /usr/local/lib/node_modules/npm \
+    && rm -f /usr/local/bin/npm \
+    && npm cache clean --force || true
 
 #Copy toàn bộ source code vào trong Image
 #Ở môi trường Prod đóng gói code chết vào image
