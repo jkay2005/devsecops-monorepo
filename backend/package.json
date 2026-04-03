@@ -2,8 +2,10 @@
   "name": "devsecops-backend",
   "version": "1.0.0",
   "dependencies": {
+    "@azure/storage-blob": "^12.31.0",
     "dotenv": "^17.4.0",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "multer": "^2.1.1"
   },
   "overrides": {
     "cross-spawn": ">=7.0.5",
