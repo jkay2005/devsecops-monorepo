@@ -2,13 +2,14 @@
   "name": "devsecops-backend",
   "version": "1.0.0",
   "dependencies": {
-    "express": "^4.18.2" 
+    "dotenv": "^17.4.0",
+    "express": "^4.18.2"
   },
   "overrides": {
     "cross-spawn": ">=7.0.5",
     "glob": ">=11.1.0",
     "minimatch": ">=10.2.3",
     "tar": ">=7.5.11",
-    "picomatch": ">=4.0.4" 
+    "picomatch": ">=4.0.4"
   }
 }

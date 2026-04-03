@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 
 const express = require('express');
 const multer = require('multer');
@@ -92,3 +92,4 @@ app.listen(port, () => {
 // Thêm comment để test ci/cd với việc gắn tag image bằng short SHA của commit
 // Thêm comment để test ci/cd với việc gắn tag image bằng short SHA của commit-fix loi lo hong high trong trivy
 // Thêm comment để test ci/cd với fix loi lo hong critical trong trivy
+// Thêm comment để test ci/cd với việc dung terraform để tạo resource AKS và ACR, đồng thời cập nhật workflow để lấy biến môi trường từ Terraform outputs

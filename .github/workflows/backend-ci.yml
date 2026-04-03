@@ -53,7 +53,8 @@ jobs:
 
       # Đăng nhập ACR (Thay thế cho Harbor login)
       - name: Đăng nhập vào ACR
-        run: az acr login --name acrdevsecopsnt114
+        # run: az acr login --name acrdevsecopsnt114
+        run: az acr login --name ${{ vars.ACR_NAME }}
 
       # - name: Thiết lập Docker Insecure Registry (Cho Harbor HTTP)
       #   run: |
@@ -67,8 +68,10 @@ jobs:
 
       # Build Image trỏ về ACR
       - name: Build Docker Image
+        # run: |
+        #   docker build --no-cache -t acrdevsecopsnt114.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }} ./backend
         run: |
-          docker build --no-cache -t acrdevsecopsnt114.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }} ./backend
+          docker build --no-cache -t ${{ vars.ACR_NAME }}.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }} ./backend
 
       # - name: Build Docker Image (Chưa push)
       #   # Đóng gói image và gắn tag trỏ về Harbor
@@ -91,7 +94,8 @@ jobs:
         with:
           # image-ref: "acrdevsecopsnt114.azurecr.io/devsecops-backend:latest"
           # exit-code: "0"
-          image-ref: "acrdevsecopsnt114.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }}"
+          # image-ref: "acrdevsecopsnt114.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }}"
+          image-ref: "${{ vars.ACR_NAME }}.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }}"
           exit-code: "1" # '1' pipeline dừng khi thấy lỗ hổng nghiêm trọng
           ignore-unfixed: true
           vuln-type: "os,library"
@@ -152,13 +156,15 @@ jobs:
 
       # Push Image lên ACR
       - name: Push Image lên ACR
-        run: |
-          docker push acrdevsecopsnt114.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }}
+        # run: |
+        #   docker push acrdevsecopsnt114.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }}
+        run: docker push ${{ vars.ACR_NAME }}.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }}
 
       # Kết nối AKS (Lấy kubeconfig tự động, không cần lưu Secret KUBE_CONFIG)
       - name: Kết nối với cụm AKS
-        run: |
-          az aks get-credentials --resource-group rg-devsecopsnt114-aks --name aks-devsecops-nt114 --overwrite-existing
+        # run: |
+        #   az aks get-credentials --resource-group rg-devsecopsnt114-aks --name aks-devsecops-nt114 --overwrite-existing
+        run: az aks get-credentials --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} --name ${{ vars.AKS_CLUSTER_NAME }} --overwrite-existing
 
       # # Chạy lệnh áp dụng file cấu hình vào cụm AKS
       # - name: Triển khai lên AKS
@@ -168,8 +174,13 @@ jobs:
 
       # Chạy lệnh áp dụng file cấu hình và cập nhật Image mới nhất
       - name: Triển khai lên AKS
+        # run: |
+        #   kubectl apply -f k8s/backend-deployment.yaml
+        #   kubectl set image deployment/devsecops-backend-deployment \
+        #     backend-container=acrdevsecopsnt114.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }}
+        #   kubectl rollout status deployment/devsecops-backend-deployment
         run: |
           kubectl apply -f k8s/backend-deployment.yaml
           kubectl set image deployment/devsecops-backend-deployment \
-            backend-container=acrdevsecopsnt114.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }}
+            backend-container=${{ vars.ACR_NAME }}.azurecr.io/devsecops-backend:${{ steps.vars.outputs.sha_short }}
           kubectl rollout status deployment/devsecops-backend-deployment
